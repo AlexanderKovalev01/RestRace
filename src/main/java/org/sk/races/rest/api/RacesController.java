@@ -21,8 +21,8 @@ public class RacesController {
     @Path("/init")
     @Produces(MediaType.APPLICATION_JSON)
     public Response initRaces() {
-        Race randomMarathon = TxtReader.readRace("RandomMarathon.txt", "Minsk Marathon");
-        races.put("Minsk Marathon", randomMarathon);
+        Race randomMarathon = TxtReader.readRace("RandomMarathon.txt", "Marathon1");
+        races.put("Marathon1", randomMarathon);
         return Response.ok(races).build();
     }
 
