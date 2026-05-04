@@ -1,5 +1,6 @@
 package org.sk.races.rest.reader;
 
+import org.sk.races.rest.api.RestRacesApp;
 import org.sk.races.rest.entities.Gender;
 import org.sk.races.rest.entities.Race;
 import org.sk.races.rest.entities.RaceItem;
@@ -7,14 +8,17 @@ import org.sk.races.rest.entities.Runner;
 
 import java.io.InputStream;
 import java.util.Scanner;
+import java.util.logging.Logger;
 
 public class TxtReader {
+    private static final Logger logger = Logger.getLogger(TxtReader.class.getName());
     public static Race readRace(String fileName, String raceName) {
         Race race = new Race(raceName);
 
         try {
             InputStream inputStream = TxtReader.class.getClassLoader().getResourceAsStream(fileName);
             if (inputStream == null) {
+                logger.severe("File not found"+ fileName);
                 return race;
             }
             Scanner sc = new Scanner(inputStream);
@@ -37,13 +41,13 @@ public class TxtReader {
                         race.addResult(raceItem);
 
                     } catch (Exception e) {
-                        System.err.println(line);
-                        e.printStackTrace();
+                        logger.warning("Failed to parse data" + e.getMessage());
                     }
                 }
             }
             sc.close();
         } catch (Exception e) {
+            logger.severe("Failed to read race data from file" + e.getMessage());
         }
         return race;
     }
