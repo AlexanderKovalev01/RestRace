@@ -22,6 +22,12 @@
       <scope>compile</scope>
     </dependency>
 
+    <dependency>
+      <groupId>org.json</groupId>
+      <artifactId>json</artifactId>
+      <version>20240303</version>
+    </dependency>
+
   </dependencies>
 
   <build>
@@ -36,7 +42,6 @@
             <failOnMissingWebXml>false</failOnMissingWebXml>
           </configuration>
         </plugin>
-
       </plugins>
     </pluginManagement>
   </build>
