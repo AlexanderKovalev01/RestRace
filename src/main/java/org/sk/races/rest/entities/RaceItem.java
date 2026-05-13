@@ -6,7 +6,7 @@ public class RaceItem {
     private Runner runner;
     private int time;
 
-    public RaceItem(int id,Runner runner, int time) {
+    public RaceItem(int id, Runner runner, int time) {
         this.runner = runner;
         this.time = time;
         this.id = id;
@@ -27,9 +27,11 @@ public class RaceItem {
     public void setId(int id) {
         this.id = id;
     }
+
     public void setRunner(Runner runner) {
         this.runner = runner;
     }
+
     public void setTime(int time) {
         this.time = time;
     }

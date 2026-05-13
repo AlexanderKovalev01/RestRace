@@ -12,13 +12,14 @@ import java.util.logging.Logger;
 
 public class TxtReader {
     private static final Logger logger = Logger.getLogger(TxtReader.class.getName());
+
     public static Race readRace(String fileName, String raceName) {
         Race race = new Race(raceName);
 
         try {
             InputStream inputStream = TxtReader.class.getClassLoader().getResourceAsStream(fileName);
             if (inputStream == null) {
-                logger.severe("File not found"+ fileName);
+                logger.severe("File not found" + fileName);
                 return race;
             }
             Scanner sc = new Scanner(inputStream);
