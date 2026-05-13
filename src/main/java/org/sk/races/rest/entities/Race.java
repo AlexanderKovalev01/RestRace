@@ -12,11 +12,12 @@ public class Race {
         this.name = name;
         this.results = new ArrayList<>();
     }
+
     public RaceItem findRunnerById(int runnerId) {
         RaceItem found = null;
         for (RaceItem item : results) {
             if (item.getId() == runnerId) {
-                return  item;
+                return item;
             }
         }
         return null;
