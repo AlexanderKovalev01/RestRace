@@ -8,6 +8,7 @@ import org.sk.races.rest.entities.Gender;
 import org.sk.races.rest.entities.Race;
 import org.sk.races.rest.entities.RaceItem;
 import org.sk.races.rest.entities.Runner;
+import org.sk.races.rest.reader.RaceCache;
 import org.sk.races.rest.reader.TxtReader;
 
 import java.util.HashMap;
@@ -15,41 +16,42 @@ import java.util.Map;
 
 @Path("/races")
 public class RacesController {
-    private static Map<String, Race> races = new HashMap<>();
+    private RaceCache raceCache = RaceCache.getInstance();
 
     @GET
     @Path("/init")
     @Produces(MediaType.APPLICATION_JSON)
     public Response initRaces() {
         Race randomMarathon = TxtReader.readRace("RandomMarathon.txt", "Marathon1");
-        races.put("Marathon1", randomMarathon);
-        return Response.ok(races).build();
+        raceCache.addRace("Marathon1", randomMarathon);
+        return Response.ok(RaceCache.getInstance().getRace("Marathon1")).build();
     }
 
     @GET
     @Path("/{raceName}/runner/{runnerId}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getRunner(@PathParam("raceName") String raceName, @PathParam("runnerId") int runnerId) {
-        Race race = races.get(raceName);
-        Response result;
+        Response result = null;
+        Race race = raceCache.getRace(raceName);
         if (race == null) {
             result = Response.status(Response.Status.NOT_FOUND).entity("Race not found: " + raceName).build();
+        } else {
+            RaceItem runner = race.findRunnerById(runnerId);
+            if (runner == null) {
+                result = Response.status(Response.Status.NOT_FOUND).entity("Runner with ID " + runnerId + " not found in race " + raceName).build();
+            } else {
+                result = Response.ok(runner).build();
+            }
         }
-        RaceItem runner = race.findRunnerById(runnerId);
-        if (runner == null) {
-            result = Response.status(Response.Status.NOT_FOUND).entity("Runner with ID " + runnerId + " not found in race " + raceName).build();
-        }
-        result = Response.ok(runner).build();
         return result;
     }
-
     @POST
     @Path("/{raceName}/runner/{runnerId}")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public Response addRunner(@PathParam("raceName") String raceName, @PathParam("runnerId") int runnerId, String runnerAsJson) {
         Response result = null;
-        Race race = races.get(raceName);
+        Race race = raceCache.getRace(raceName);
         if (race == null) {
             result = Response.status(Response.Status.NOT_FOUND).entity("Race not found: " + raceName).build();
         } else {
