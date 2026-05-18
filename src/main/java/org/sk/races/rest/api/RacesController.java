@@ -11,8 +11,7 @@ import org.sk.races.rest.entities.Runner;
 import org.sk.races.rest.reader.RaceCache;
 import org.sk.races.rest.reader.TxtReader;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @Path("/races")
 public class RacesController {
@@ -45,6 +44,7 @@ public class RacesController {
         }
         return result;
     }
+
     @POST
     @Path("/{raceName}/runner/{runnerId}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -90,6 +90,35 @@ public class RacesController {
             }
         }
         return result;
+    }
+
+    private List<Runner> consumerRunners = new ArrayList<>();
+    private int nextId = 1;
+
+    @GET
+    @Path("/runners/producer/{count}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response produceRunners(@PathParam("count") int count) {
+        List<Runner> runners = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            runners.add(RandomRunner.generateRunner());
+        }
+        return Response.ok(runners).build();
+    }
+
+    @GET
+    @Path("/runners/consumer")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response consumeRunners() {
+        int count = new Random().nextInt(20) + 1;
+
+        List<Runner> runners = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            runners.add(RandomRunner.generateRunner());
+        }
+
+        consumerRunners.addAll(runners);
+        return Response.ok(consumerRunners).build();
     }
 }
 
