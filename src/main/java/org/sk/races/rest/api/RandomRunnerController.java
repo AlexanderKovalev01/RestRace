@@ -12,8 +12,6 @@ import org.sk.races.rest.entities.Gender;
 import org.sk.races.rest.entities.Runner;
 import org.sk.races.rest.reader.RaceCache;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -25,8 +23,8 @@ import java.util.Random;
 import java.util.logging.Logger;
 
 @Path("/runners")
-public class RandomRunner {
-    private final Logger LOG = Logger.getLogger(RandomRunner.class.getName());
+public class RandomRunnerController {
+    private final Logger logger = Logger.getLogger(RandomRunnerController.class.getName());
     private final RaceCache raceCache = RaceCache.getInstance();
     private final String[] NAMES = {"John", "Jane", "Mike", "Sarah", "Tom", "Anna", "David", "Maria"};
     private final String[] SURNAMES = {"Smith", "Johnson", "Brown", "Lee", "Kim", "Chen"};
@@ -35,9 +33,11 @@ public class RandomRunner {
     private String host;
     private String port;
 
-    public RandomRunner() {
-        host = getProperty("host");
-        port = getProperty("port");
+    public RandomRunnerController() {
+        Configuration config = Configuration.getInstance();
+        Properties props = config.getProperties();
+        host = props.getProperty("host");
+        port = props.getProperty("port");
     }
 
 
@@ -50,22 +50,6 @@ public class RandomRunner {
             runners.add(generateRunner());
         }
         return Response.ok(runners).build();
-    }
-
-    private String getProperty(String propName) {
-        InputStream is = RandomRunner.class.getClassLoader().getResourceAsStream("raceapp.properties");
-
-        Properties appProps = new Properties();
-        try {
-            appProps.load(is);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        String propValue = appProps.getProperty(propName);
-        LOG.info(String.format("Loaded property: %s=%s", propName, propValue));
-
-        return propValue;
     }
 
     @GET
