@@ -92,4 +92,15 @@ public class RacesController {
         return result;
 
     }
+
+    @GET
+    @Path("/persist")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response persistRaces() {
+        List<Runner> allRunners = RaceCache.getInstance().getAllRunners();
+        for (Runner runner : allRunners) {
+            
+        }
+        return Response.ok(RaceCache.getInstance().getRace("Marathon1")).build();
+    }
 }
