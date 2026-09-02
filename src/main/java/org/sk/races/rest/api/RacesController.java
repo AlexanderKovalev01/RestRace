@@ -11,6 +11,7 @@ import org.sk.races.rest.entities.Runner;
 import org.sk.races.rest.reader.RaceCache;
 import org.sk.races.rest.reader.TxtReader;
 
+import java.sql.Time;
 import java.util.*;
 
 @Path("/races")
@@ -62,8 +63,8 @@ public class RacesController {
                 int age = json.getInt("age");
                 String country = json.getString("country");
                 Gender gender = Gender.fromString(json.getString("gender"));
-                int time = RaceItem.parseTimeToSeconds(json.getString("time"));
-
+                int seconds = RaceItem.parseTimeToSeconds(json.getString("time"));
+                Time time = RaceItem.secondsToTime(seconds);
                 Runner runner = new Runner(fullName, age, country, gender);
 
                 if (runnerId == jsonId) {
