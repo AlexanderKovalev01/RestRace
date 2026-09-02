@@ -6,12 +6,15 @@ public class Runner {
     private int age;
     private String country;
     private Gender gender;
+    private String city;
 
     public Runner( String name, int age, String country, Gender gender) {
         this.name = name;
         this.age = age;
         this.country = country;
         this.gender = gender;
+        this.city = city;
+
     }
 
     public String getName() {
@@ -44,5 +47,12 @@ public class Runner {
 
     public Gender getGender() {
         return gender;
+    }
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
     }
 }

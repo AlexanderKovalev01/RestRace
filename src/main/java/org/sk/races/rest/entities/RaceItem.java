@@ -1,15 +1,28 @@
 package org.sk.races.rest.entities;
 
+import java.sql.Time;
+
 public class RaceItem {
 
     private int id;
     private Runner runner;
-    private int time;
+    private Time time;
 
-    public RaceItem(int id, Runner runner, int time) {
+    public RaceItem(int id, Runner runner, Time time) {
+        this.id = id;
         this.runner = runner;
         this.time = time;
-        this.id = id;
+    }
+    public static int parseTimeToSeconds(String timeStr) {
+        String[] parts = timeStr.split(":");
+        if (parts.length != 3) return 0;
+        int hours = Integer.parseInt(parts[0]);
+        int minutes = Integer.parseInt(parts[1]);
+        int seconds = Integer.parseInt(parts[2]);
+        return hours * 3600 + minutes * 60 + seconds;
+    }
+    public static Time secondsToTime(int seconds) {
+        return new Time(seconds / 3600, (seconds % 3600) / 60, seconds % 60);
     }
 
     public int getId() {
@@ -20,7 +33,7 @@ public class RaceItem {
         return runner;
     }
 
-    public int getTime() {
+    public Time getTime() {
         return time;
     }
 
@@ -32,27 +45,16 @@ public class RaceItem {
         this.runner = runner;
     }
 
-    public void setTime(int time) {
+    public void setTime(Time time) {
         this.time = time;
     }
 
     public String getStringTime() {
-        int hours = time / 3600;
-        int minutes = (time % 3600) / 60;
-        int seconds = time % 60;
-        return String.format("%d:%02d:%02d", hours, minutes, seconds);
+        return time.toString();
     }
 
     @Override
     public String toString() {
         return runner.getName() + " - " + getStringTime();
-    }
-
-    public static int parseTimeToSeconds(String timeStr) {
-        String[] parts = timeStr.split(":");
-        int hours = Integer.parseInt(parts[0]);
-        int minutes = Integer.parseInt(parts[1]);
-        int seconds = Integer.parseInt(parts[2]);
-        return hours * 3600 + minutes * 60 + seconds;
     }
 }
