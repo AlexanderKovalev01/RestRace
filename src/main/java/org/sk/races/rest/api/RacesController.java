@@ -11,7 +11,6 @@ import org.sk.races.rest.entities.Runner;
 import org.sk.races.rest.reader.RaceCache;
 import org.sk.races.rest.reader.TxtReader;
 
-import java.sql.Time;
 import java.util.*;
 
 @Path("/races")
@@ -62,10 +61,10 @@ public class RacesController {
                 String fullName = json.getString("name") + " " + json.getString("lastName");
                 int age = json.getInt("age");
                 String country = json.getString("country");
+                String city = json.optString("city");
                 Gender gender = Gender.fromString(json.getString("gender"));
-                int seconds = RaceItem.parseTimeToSeconds(json.getString("time"));
-                Time time = RaceItem.secondsToTime(seconds);
-                Runner runner = new Runner(fullName, age, country, gender);
+                int timeInSeconds = RaceItem.parseTimeToSeconds(json.getString("time"));
+                Runner runner = new Runner(fullName, age, country, gender, city);
 
                 if (runnerId == jsonId) {
                     RaceItem existing = race.findRunnerById(runnerId);
@@ -73,7 +72,7 @@ public class RacesController {
                         result = Response.status(Response.Status.NOT_FOUND).entity("Runner with ID " + runnerId + " not found").build();
                     } else {
                         existing.setRunner(runner);
-                        existing.setTime(time);
+                        existing.setTime(timeInSeconds);
                         result = Response.ok(existing).build();
                     }
                 } else {
@@ -81,7 +80,7 @@ public class RacesController {
                     if (existing != null) {
                         result = Response.status(Response.Status.CONFLICT).entity("Runner with ID " + jsonId + " already exists").build();
                     } else {
-                        RaceItem newRunner = new RaceItem(jsonId, runner, time);
+                        RaceItem newRunner = new RaceItem(jsonId, runner, timeInSeconds);
                         race.addResult(newRunner);
                         result = Response.status(Response.Status.CREATED).entity(newRunner).build();
                     }

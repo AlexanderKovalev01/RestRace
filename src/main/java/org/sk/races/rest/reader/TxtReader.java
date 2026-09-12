@@ -7,7 +7,6 @@ import org.sk.races.rest.entities.RaceItem;
 import org.sk.races.rest.entities.Runner;
 
 import java.io.InputStream;
-import java.sql.Time;
 import java.util.Scanner;
 import java.util.logging.Logger;
 
@@ -34,13 +33,13 @@ public class TxtReader {
                         String LastName = parts[2];
                         String genderStr = parts[3].trim();
                         int totalSeconds = RaceItem.parseTimeToSeconds(parts[7].trim());
-                        Time time = RaceItem.secondsToTime(totalSeconds);
                         int age = Integer.parseInt(parts[4].trim());
                         String country = parts[5].trim();
+                        String city = parts[6].trim();
                         String fullName = name + " " + LastName;
                         Gender gender = Gender.fromString(genderStr);
-                        Runner runner = new Runner(fullName, age, country, gender);
-                        RaceItem raceItem = new RaceItem(id, runner, time);
+                        Runner runner = new Runner(fullName, age, country, gender, city);
+                        RaceItem raceItem = new RaceItem(id, runner, totalSeconds);
                         race.addResult(raceItem);
 
                     } catch (Exception e) {
