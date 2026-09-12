@@ -4,41 +4,38 @@ import org.sk.races.rest.entities.Race;
 import org.sk.races.rest.entities.RaceItem;
 
 import java.sql.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-public class CsvService {
-
-    private static final String URL = "jdbc:mysql://localhost:3306/w3schools";
-    private static final String USER = "root";
-    private static final String PASSWORD = "****";
+public class CsvToDatabase {
+    private static final Logger logger = Logger.getLogger(CsvToDatabase.class.getName());
     public static void main(String[] args) {
-        CsvService service = new CsvService();
+        CsvToDatabase service = new CsvToDatabase();
         boolean success = service.loadDataFromCSV();
 
         if (success) {
-            System.out.println("The data has been successfully loaded into the database!");
+            logger.info("The data has been successfully loaded into the database!");
         } else {
-            System.out.println("Error loading data!");
+            logger.severe("Error loading data!");
         }
     }
+
     public boolean loadDataFromCSV() {
         try {
-            Race minskRace = CsvRaceRead.readRaceFromCSV("src/main/resources/minsk_maraphon.csv", "Минский марафон");
-            Race mogilevRace = CsvRaceRead.readRaceFromCSV("src/main/resources/mogliev_maraphon.csv", "Могилёвский марафон");
+            Race maraphon1 = CsvRaceReader.readRaceFromCSV("src/main/resources/maraphon 1.csv", "марафон 1");
+            Race maraphon2 = CsvRaceReader.readRaceFromCSV("src/main/resources/maraphon 2.csv", "марафон 2");
 
-            try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD)) {
-                conn.setAutoCommit(false);
-
-                insertRunnersFromRace(conn, minskRace);
-                insertRunnersFromRace(conn, mogilevRace);
+            Connection conn = DatabaseConnection.getConnection();
+                insertRunnersFromRace(conn,maraphon1);
+                insertRunnersFromRace(conn,maraphon2);
                 insertMarathons(conn);
-                insertRacesFromRace(conn, minskRace, 1);
-                insertRacesFromRace(conn, mogilevRace, 2);
-                conn.commit();
+                insertRacesFromRace(conn,maraphon1, 1);
+                insertRacesFromRace(conn, maraphon2, 2);
+            logger.info("All data has been uploaded");
                 return true;
-            }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "Error while loading data " + e.getMessage(), e);
             return false;
         }
     }
@@ -68,14 +65,14 @@ public class CsvService {
         String sql = "INSERT INTO marathons (id, name, country, city) VALUES (?, ?, ?, ?)";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, 1);
-            pstmt.setString(2, "Минский марафон");
-            pstmt.setString(3, "Беларусь");
-            pstmt.setString(4, "Минск");
+            pstmt.setString(2, "марафон 1");
+            pstmt.setString(3, "Страна 1");
+            pstmt.setString(4, "Город 1");
             pstmt.addBatch();
             pstmt.setInt(1, 2);
-            pstmt.setString(2, "Могилёвский марафон");
-            pstmt.setString(3, "Беларусь");
-            pstmt.setString(4, "Могилёв");
+            pstmt.setString(2, "марафон 2");
+            pstmt.setString(3, "Страна 2");
+            pstmt.setString(4, "Город 2");
             pstmt.addBatch();
             pstmt.executeBatch();
         }
@@ -88,7 +85,7 @@ public class CsvService {
 
                 pstmt.setInt(1, item.getId());
                 pstmt.setInt(2, marathonId);
-                pstmt.setTime(3, item.getTime());
+                pstmt.setInt(3, item.getTime());
                 pstmt.setInt(4, item.getId());
                 pstmt.addBatch();
             }

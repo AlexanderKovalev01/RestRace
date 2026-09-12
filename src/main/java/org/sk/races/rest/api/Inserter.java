@@ -7,7 +7,7 @@ import java.sql.Statement;
 
 public class Inserter {
     public static void main(String[] args) {
-        String url = "jdbc:mysql://localhost:3306/w3schools";
+        String url = "jdbc:mysql://localhost:3306/marathon_db";
         String user = "root";
         String password = "*****";
         try (Connection con = DriverManager.getConnection(url, user, password);

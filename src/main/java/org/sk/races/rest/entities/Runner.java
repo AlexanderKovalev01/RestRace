@@ -8,7 +8,7 @@ public class Runner {
     private Gender gender;
     private String city;
 
-    public Runner( String name, int age, String country, Gender gender) {
+    public Runner( String name, int age, String country, Gender gender, String city ) {
         this.name = name;
         this.age = age;
         this.country = country;

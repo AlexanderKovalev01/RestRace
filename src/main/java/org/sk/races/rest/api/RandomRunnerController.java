@@ -29,6 +29,7 @@ public class RandomRunnerController {
     private final String[] NAMES = {"John", "Jane", "Mike", "Sarah", "Tom", "Anna", "David", "Maria"};
     private final String[] SURNAMES = {"Smith", "Johnson", "Brown", "Lee", "Kim", "Chen"};
     private final String[] COUNTRIES = {"USA", "UK", "Germany", "France", "Japan"};
+    private final String[] CITIES = {"New York", "London", "Berlin", "Paris", "Tokyo", "Rome", "Madrid", "Amsterdam"};
     private final Random random = new Random();
     private String host;
     private String port;
@@ -74,7 +75,8 @@ public class RandomRunnerController {
                 String genderStr = object.getString("gender");
                 Gender gender = Gender.fromString(genderStr);
                 String country = object.getString("country");
-                Runner runner = new Runner(name, age, country, gender);
+                String city = object.getString("city");
+                Runner runner = new Runner(name, age, country, gender, city);
                 runners.add(runner);
             }
             raceCache.addRunners(runners);
@@ -90,8 +92,9 @@ public class RandomRunnerController {
         String name = NAMES[random.nextInt(NAMES.length)] + " " + SURNAMES[random.nextInt(SURNAMES.length)];
         int age = 18 + random.nextInt(50);
         String country = COUNTRIES[random.nextInt(COUNTRIES.length)];
+        String city = CITIES[random.nextInt(CITIES.length)];
         Gender gender = random.nextBoolean() ? Gender.MALE : Gender.FEMALE;
-        return new Runner(name, age, country, gender);
+        return new Runner(name, age, country, gender, city);
     }
 
 }

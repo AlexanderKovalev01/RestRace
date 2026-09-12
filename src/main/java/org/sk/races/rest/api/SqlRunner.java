@@ -7,7 +7,7 @@ public class SqlRunner {
 
         Class.forName("com.mysql.cj.jdbc.Driver");
 
-        try (Connection con = DriverManager .getConnection("jdbc:mysql://localhost:3306/w3schools", "root", "*****")) {
+        try (Connection con = DriverManager .getConnection("jdbc:mysql://localhost:3306/marathon_db", "root", "*****")) {
             String sql = "SELECT " +
                     "runners.first_name, " +
                     "runners.last_name, " +
