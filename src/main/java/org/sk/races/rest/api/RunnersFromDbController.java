@@ -2,6 +2,7 @@ package org.sk.races.rest.api;
 
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -20,6 +21,7 @@ import java.util.logging.Logger;
 @Path("/runners-db")
 public class RunnersFromDbController {
     private static final Logger logger = Logger.getLogger(RunnersFromDbController.class.getName());
+
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getRunnersFromDb() {
@@ -29,7 +31,8 @@ public class RunnersFromDbController {
 
         try {
             Connection conn = DatabaseConnection.getConnection();
-            if (conn == null) { logger.severe("Failed to connect to the database.");
+            if (conn == null) {
+                logger.severe("Failed to connect to the database.");
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("{\"status\": \"Database connection failed\"}").build();
             }
             try (PreparedStatement pstmt = conn.prepareStatement(sql);
@@ -55,5 +58,57 @@ public class RunnersFromDbController {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("{\"status\": \"Error: " + e.getMessage() + "\"}").build();
         }
         return Response.ok(runners).build();
+    }
+
+    @GET
+    @Path("/{marathonId}/runner/{runnerId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getRunnerById(
+            @PathParam("marathonId") int marathonId,
+            @PathParam("runnerId") int runnerId) {
+        String sql = "SELECT r.first_name, r.last_name, r.gender, r.age, r.country, r.city " +
+                "FROM races rc " +
+                "JOIN runners r ON rc.runner_id = r.id " +
+                "WHERE rc.marathon_id = ? AND rc.runner_id = ?";
+
+        try {
+            Connection conn = DatabaseConnection.getConnection();
+            if (conn == null) {
+                logger.severe("Failed to connect to the database.");
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("{\"status\": \"Database connection failed\"}").build();
+            }
+
+            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                pstmt.setInt(1, marathonId);
+                pstmt.setInt(2, runnerId);
+
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    if (rs.next()) {
+                        String fullName = rs.getString("first_name") + " " + rs.getString("last_name");
+                        Gender gender = Gender.fromString(rs.getString("gender"));
+
+                        Runner runner = new Runner(
+                                fullName,
+                                rs.getInt("age"),
+                                rs.getString("country"),
+                                gender,
+                                rs.getString("city")
+                        );
+
+                        logger.info(String.format("Found runner %d in marathon %d.", runnerId, marathonId));
+
+                        return Response.ok(runner).build();
+
+                    } else {
+                        logger.warning(String.format("Runner %d not found in marathon %d", runnerId, marathonId));
+
+                        return Response.status(Response.Status.NOT_FOUND).entity("{\"status\": \"Runner not found\"}").build();
+                    }
+                }
+            }
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error retrieving runner from the database", e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("{\"status\": \"Error: " + e.getMessage() + "\"}").build();
+        }
     }
 }
