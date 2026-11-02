@@ -18,7 +18,6 @@ public class DatabaseConnection {
             try {
                 Configuration config = Configuration.getInstance();
                 Properties props = config.getProperties();
-
                 String url = props.getProperty("db.url");
                 String user = props.getProperty("db.user");
                 String password = props.getProperty("db.password");
