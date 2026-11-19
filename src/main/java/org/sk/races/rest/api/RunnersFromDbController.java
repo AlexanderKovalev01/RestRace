@@ -1,5 +1,6 @@
 package org.sk.races.rest.api;
 
+import jakarta.annotation.Resource;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
@@ -8,8 +9,11 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.sk.races.rest.entities.Gender;
 import org.sk.races.rest.entities.Runner;
-import org.sk.races.rest.reader.DatabaseConnection;
 
+
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.sql.DataSource;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +23,19 @@ import java.util.logging.Logger;
 @Path("/runners-db")
 public class RunnersFromDbController {
     private static final Logger logger = Logger.getLogger(RunnersFromDbController.class.getName());
+    private static final String DS_JNDI_NAME = "java:jboss/datasources/MarathonDS";
+    @Resource(lookup = DS_JNDI_NAME)
+    private DataSource dataSource;
+
+    private DataSource resolveDataSource() throws NamingException {
+        if (this.dataSource != null) {
+            return this.dataSource;
+        }
+        logger.warning("@Resource dataSource was null, using InitialContext lookup for " + DS_JNDI_NAME);
+        InitialContext ctx = new InitialContext();
+        this.dataSource = (DataSource) ctx.lookup(DS_JNDI_NAME);
+        return this.dataSource;
+    }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -28,7 +45,7 @@ public class RunnersFromDbController {
         String sql = "SELECT id, first_name, last_name, gender, age, country, city FROM runners";
 
         try {
-            Connection conn = DatabaseConnection.getConnection();
+            Connection conn = resolveDataSource().getConnection();
             if (conn == null) {
                 logger.severe("Failed to connect to the database.");
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("{\"status\": \"Database connection failed\"}").build();
@@ -67,7 +84,7 @@ public class RunnersFromDbController {
         String sql = "SELECT r.first_name, r.last_name, r.gender, r.age, r.country, r.city " + "FROM races rc " + "JOIN runners r ON rc.runner_id = r.id " + "WHERE rc.marathon_id = ? AND rc.runner_id = ?";
 
         try {
-            Connection conn = DatabaseConnection.getConnection();
+            Connection conn = resolveDataSource().getConnection();
             if (conn == null) {
                 logger.severe("Failed to connect to the database.");
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("{\"status\": \"Database connection failed\"}").build();
@@ -119,7 +136,7 @@ public class RunnersFromDbController {
         Savepoint savepoint = null;
 
         try {
-            conn = DatabaseConnection.getConnection();
+            conn = resolveDataSource().getConnection();
             if (conn == null) {
                 logger.severe("Failed to connect to the database.");
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("{\"status\": \"Database connection failed\"}").build();
@@ -170,13 +187,8 @@ public class RunnersFromDbController {
             logger.log(Level.SEVERE, "Transaction error", e);
             try {
                 if (conn != null) {
-                    if (savepoint != null) {
-                        conn.rollback(savepoint);
-                        logger.info("Rolled back to savepoint 'before_log_insert'. SELECT kept.");
-                    } else {
-                        conn.rollback();
-                        logger.info("Full transaction rolled back (no savepoint).");
-                    }
+                    conn.rollback(savepoint);   
+                    logger.info("Rolled back (savepoint=" + savepoint + ").");
                 }
             } catch (SQLException ex) {
                 logger.log(Level.SEVERE, "Error during rollback", ex);
@@ -187,7 +199,6 @@ public class RunnersFromDbController {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("{\"status\": \"Error: " + e.getMessage() + "\"}").build();
 
         } finally {
-
             try {
                 if (conn != null) {
                     conn.setAutoCommit(true);
